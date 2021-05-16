@@ -1,16 +1,27 @@
 import observe from './observe.js'
+import Watcher from './Watcher.js'
+
 let obj = {
 	a: {
 		m: {
 			n: 1
 		}
 	},
-	b: 2,
-	c: [1, 2, { x: 3 }]
+	b: {
+		x: 2
+	}
 }
 observe(obj)
+new Watcher(obj, 'a.m.n', (val, oldValue) => {
+	console.log('watcher', val, oldValue)
+})
+new Watcher(obj, 'b.x', (val, oldValue) => {
+	console.log('watcher', val, oldValue)
+})
+obj.a.m.n = 2
+obj.b.x = 3
 
-obj.c.push({ y: 4})
-console.log(obj)
-obj.c[3].y = 5
+
+
+
 

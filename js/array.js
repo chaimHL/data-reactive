@@ -25,7 +25,32 @@ methodsCouldChange.forEach(item => {
 		// 能 console 就说明能侦测到改变了
 		console.log('数组被改变了')
 		// 给改写的方法添加上功能
-		original.apply(this, arguments)
+		const result = original.apply(this, arguments)
+		// 如果是 push、unshift、splice，则要判断有没有新增项
+		let inserted = []
+		switch (item){
+			// 不同的 case 使用相同的代码
+			case 'push':
+			case 'unshift':
+				inserted = [...arguments] // 扩展运算符背后调用的是遍历器接口 Symbol.iterator， arguments 就有遍历器接口
+				break
+			case 'splice':
+			// arguments 为类数组对象，不能直接调用数组方法，
+			// 下面这句也可以写成 inserted = Array.prototype.slice.call(arguments,2)
+			inserted = [...arguments].slice(2)
+				break
+			default:
+				break
+		}
+		// 获取到 Observe 实例 ob，以便调用实例方法 observeArray
+		const ob = this.__ob__
+		if (inserted.length) {
+			ob.observeArray(inserted)
+		}
+		
+		ob.dep.notify()
+		
+		return result
 	}, false)
 })
 
